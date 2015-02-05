@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="sale_order_crm_field" model="ir.ui.view">
+            <field name="name">sale.order.crm.field</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form" />
+            <field name="arch" type="xml">
+            	<xpath expr="/form/sheet/h1" position="inside">
+            		<div class="oe_right" name="button_box">
+            			<button class="oe_inline oe_stat_button" icon="fa-list-alt" name="do_view_mo"  type="object" attrs="{'invisible': [('state', 'in', ['draft','sent'])]}">
+            				<field name='mo_count' widget='statinfo' string="Manufacturing"/>
+            			</button>
+            			<button class="oe_inline oe_stat_button" icon="fa-shopping-cart" name="do_view_po"  type="object" attrs="{'invisible': [('state', 'in', ['draft','sent'])]}">
+            				<field name='po_count' widget='statinfo' string="Purchases"/>
+            			</button>
+                        <button class="oe_inline oe_stat_button" icon="fa-truck" name="do_view_pickings_sale"  type="object" attrs="{'invisible': [('state', 'in', ['draft','sent'])]}">
+                        	<field name='picking_count' widget='statinfo' string="Shipments"/>
+            			</button>
+                    </div>
+            	</xpath>
+	            <!-- Adding test_order field -->
+	            <xpath expr="/form/sheet/group/group" position= "inside">
+					<field name="test_order"/>            	
+	            </xpath>
+	            <!-- form_view_ref used for which view to open (of object crm.lead) when clicked on many2one field -->
+				<xpath expr="/form/sheet/group/group" position= "inside">
+					<field name="is_manufacture" attrs="{'readonly':[('state','not in',('draft','sent'))]}"/>
+					<widget type="sale_order_line"/>
+					<!--  <widget type="change_view"/>-->
+				</xpath>
+				<!-- Product Category field in sale.order.line tree view -->
+				<xpath expr = "/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/tree/field[@name='product_id']" position="before">
+					<field name = "category_id" />
+				</xpath>
+				<!-- Adding field priority -->
+	            <xpath expr="/form/sheet/group/group/field[@name='pricelist_id']" position= "after">
+					<field name="priority" class = "oe_inline"/>					
+	            </xpath>				
+				<!-- Product Category field in sale.order.line form view-->
+				<xpath expr = "/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/form/group/group/field[@name='product_id']" position="before">
+					<field name = "category_id" />
+				</xpath>
+				<!-- All the fields after the price_unit and before the description field in sale order line -->
+				<xpath expr = "/form/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/form/label[@for='name']" position="before">
+					<group>
+						<field name="is_multi_level"/>
+					</group>
+					
+					
+					<group col="4" attrs = "{'invisible':[('is_multi_level','!=',True)]}">
+						<div>
+						<label for="multi_level_bom"/>
+						<field name="multi_level_bom">
+							<tree>
+								<field name='main_product' context="{'search_default_categ_id': bom_category_id}"/>
+								<field name='quantity'/>
+							</tree>
+							<form>
+								<group col="6">
+									<field name='bom_category_id'/>
+									<field name='main_product' context="{'search_default_categ_id': bom_category_id}"/>
+									<div>
+										<label for='quantity'/>
+										<field name='quantity' class='oe_inline' />
+										<field name='unit' class='oe_inline'/>								
+									</div>
+								</group>
+								<div>
+									<label for="manufacture_size"/>
+									<field name="manufacture_size" />
+									<strong>Width </strong><field class = "oe_inline" attrs = "{'readonly':[('manufacture_size','!=',15)]}" name="width" nolabel = "1"  /><b>mm</b>  X  <strong>Height </strong><field attrs = "{'readonly':[('manufacture_size','!=',15)]}"  class = "oe_inline" name = "height" nolabel = "1"  /><b>mm</b>
+								</div>
+								<group col="4" colspan="4">
+									<field name = "paper_id" domain="[('categ_id.is_paper','=',True)]" help="displays products in Paper category"/>
+									<field name = "paper_product" context="{'paper_product':True}" domain="[('product_tmpl_id','=',paper_id)]" help="displays paper from the paper type product template"/>
+									<field name = "warehouse_qty" />
+									<field name = "print_machine" context="{'paper_product':paper_product}" />
+									<field name = "product_count" />
+									<field name = "color_paper" />
+								</group>
+								<group col="4">
+									<field name="additional_works" nolabel="1">
+										<tree editable="bottom">
+											<field name="sequence"/>
+											<field name="product"/>
+											<field name="workcenter"/>
+											<field name="cycle_nbr"/>
+											<field name="hour_nbr" widget="float_time"/>
+										</tree>
+									</field>
+								</group>
+							</form>
+						</field>
+						</div>
+					</group>
+					
+					
+					
+					<group attrs = "{'invisible':[('is_multi_level','=',True)]}">
+						<div>
+							<label for="manufacture_size"/>
+							<field name="manufacture_size" />
+							<strong>Width </strong><field class = "oe_inline" attrs = "{'readonly':[('manufacture_size','!=',15)]}" name="width" nolabel = "1"  /><b>mm</b>  X  <strong>Height </strong><field attrs = "{'readonly':[('manufacture_size','!=',15)]}"  class = "oe_inline" name = "height" nolabel = "1"  /><b>mm</b>
+						</div>
+						<group col="4" colspan="4">
+							<field name = "paper_id" domain="[('categ_id.is_paper','=',True)]" help="displays products in Paper category"/>
+							<field name = "paper_product" context="{'paper_product':True}" domain="[('product_tmpl_id','=',paper_id)]" help="displays paper from the paper type product template"/>
+							<field name = "warehouse_qty" />
+							<field name = "print_machine" context="{'paper_product':paper_product}" />
+							<field name = "product_count" />
+							<field name = "color_paper" />
+						</group>
+					</group>
+					
+					<group col="4">
+							<field name="additional_works" nolabel="1">
+								<tree editable="bottom">
+									<field name="sequence"/>
+									<field name="product"/>
+									<field name="workcenter"/>
+									<field name="cycle_nbr"/>
+									<field name="hour_nbr" widget="float_time"/>
+								</tree>
+							</field>
+						</group>
+				<separator/>
+				</xpath>				
+			</field>
+		</record>
+		
+		<!-- The product belonging to the selected category will be displayed -->
+		<record id="sale_stock_view_changes" model="ir.ui.view">
+            <field name="name">sale.stock</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_stock.view_order_form_inherit" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="attributes">
+                	<attribute name='context'>{'search_default_categ_id':category_id,'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom}</attribute>
+                </xpath>
+                <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="attributes">
+					<attribute name='context'>{'search_default_categ_id':category_id,'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom}</attribute>
+				</xpath>
+			</field>
+		</record>
+		
+		<!-- inherited view to make the order lines list in the form non-editable
+             for the members of some usability groups -->
+        <!-- OVERRIDING IN SALE_VIEW -->
+        <record id="view_order_form_editable_list" model="ir.ui.view">
+            <field name="name">sale.order.form.editable.list</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="groups_id" eval="[(4, ref('product.group_uos')), (4, ref('product.group_stock_packaging'))]"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree" position="attributes">
+                    <attribute name="editable"/>
+                </xpath>
+            </field>
+        </record>
+		
+		<record id="do_view_mo" model="ir.actions.act_window">
+            <field name="name">Related Manufacturing Orders</field>
+            <field name="res_model">mrp.production</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('id','=',active_id)]</field>            
+        </record>
+        
+        <record id="do_view_po" model="ir.actions.act_window">
+            <field name="name">Related Purchase Orders</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('id','=',active_id)]</field>            
+        </record>
+		
+		<record id="do_view_pickings_sale_action" model="ir.actions.act_window">
+            <field name="name">Pickings for Groups</field>
+            <field name="res_model">stock.picking</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        <field name="domain">[('group_id','=',active_id)]</field>
+        </record>		
+	</data>
+</openerp>
+		 		
